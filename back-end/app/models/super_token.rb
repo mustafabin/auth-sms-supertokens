@@ -6,7 +6,7 @@ class SuperToken < ApplicationRecord
     LIMIT_TOKENS_PER_USER = 2
     AUTO_REFRESH = true
     DAYS_TO_EXPIRE = 14
-    def self.generate_token(user,request)
+    def self.generate_token(user,request, sms=false)
         if user && request
             all_tokens = SuperToken.where(user_id: user.id)
             # if there is a limit destroy the least active token(s)
@@ -23,10 +23,15 @@ class SuperToken < ApplicationRecord
                     all_tokens.order("updated_at")[0].destroy
                 end
             end
-            # generate hash https://github.com/rails/rails/blob/main/activerecord/lib/active_record/secure_token.rb
-            hash = SecureRandom.base58(36)
-            # generate token based off user
-            SuperToken.create!(token:hash, user_id: user.id, client_ip: request.remote_ip, agent: request.user_agent, expiry: Time.now)
+            if(!sms)
+                # generate hash https://github.com/rails/rails/blob/main/activerecord/lib/active_record/secure_token.rb
+                hash = SecureRandom.base58(36)
+                # generate token based off user
+                SuperToken.create!(token:hash, user_id: user.id, client_ip: request.remote_ip, agent: request.user_agent, expiry: Time.now)
+            else
+                randomNumber = rand(12345..99999)
+                SuperToken.create!(token:"#{user.id}#{randomNumber}",is_sms:true, user_id: user.id, client_ip: request.remote_ip, agent: request.user_agent, expiry: Time.now)
+            end
         else 
             raise "user and/or request arguments undefined"
         end
@@ -39,6 +44,11 @@ class SuperToken < ApplicationRecord
         super_token = SuperToken.find_by(token:token)
         if !super_token
             return {status: "bad", error:"SuperToken Incorrect", message:"Token doesnt exist in database"}
+        end
+        if super_token.is_sms
+            user = super_token.user
+            super_token.destroy
+            return {status: "ok", user:user}
         end
         if super_token.client_ip == request.remote_ip
             if is_expired super_token.expiry.to_i
