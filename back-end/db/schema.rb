@@ -26,6 +26,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_04_220941) do
     t.string "email"
     t.string "phone"
     t.string "password_digest"
+    t.boolean "is_verified", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

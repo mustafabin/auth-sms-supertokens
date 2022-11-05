@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-    before_action :authorize, only: [:me]
+    before_action :authorize, only: [:me,:verify_sms]
     
     rescue_from Twilio::REST::RestError, with: :twilio_error
 
@@ -42,6 +42,9 @@ class UsersController < ApplicationController
         )
 
         render json: {status:"good",message: "sent"}
+    end
+    def verify_sms
+        render json:  @user
     end
     private
     def twilio_error(exception)

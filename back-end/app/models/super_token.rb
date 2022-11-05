@@ -7,6 +7,7 @@ class SuperToken < ApplicationRecord
     AUTO_REFRESH = true
     DAYS_TO_EXPIRE = 14
     SMS_EXPIRY = 10 # in minutes 
+
     def self.generate_token(user,request, sms=false)
         if user && request
             all_tokens = SuperToken.where(user_id: user.id)
@@ -52,6 +53,7 @@ class SuperToken < ApplicationRecord
             user = super_token.user
             super_token.destroy
             if(age_of_token < SMS_EXPIRY*60)
+                user.update(is_verified: true)
                 return {status: "ok", user:user}
             else
                 return {status: "bad", error:"401 not authorized", message:"EXPIRED SMS TOKEN"}

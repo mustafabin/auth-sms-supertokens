@@ -9,4 +9,4 @@
 User.destroy_all
 SuperToken.destroy_all
 
-User.create!(email: "mustafa@binalhag.dev", phone:"9294226244", password:"123")
+User.create!(email: "mustafa@binalhag.dev", phone:"9294226244", password:"123",is_verified:true)

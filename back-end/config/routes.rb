@@ -4,7 +4,8 @@ Rails.application.routes.draw do
   get "/me", to: "users#me" 
   post "/login", to: "users#login" 
   post "/signup", to: "users#signup" 
-  post "/text", to: "users#text" 
+  post "/text", to: "users#text" # get sms text
+  get "/verify", to: "users#verify_sms" # valid the sms token
   # Defines the root path route ("/")
   # root "articles#index"
 end
